@@ -1,37 +1,15 @@
 #!/usr/bin/env python3
-# Script to parse the relevant band gap data from pymatgen both from the Eigenval and Vasprun outputs
-# Eigenval is usually the most reliable but double check your parameters if different values are obtained for the gap
+from pymatgen.io.vasp.outputs import Vasprun
 
-from pymatgen.io.vasp.outputs import Eigenval, Vasprun
-import numpy as np
+vdata = Vasprun('vasprun.xml', separate_spins=True)
 
-data = Eigenval('EIGENVAL')
-vdata = Vasprun('vasprun.xml')
-vdata.separate_spins=True
+gap, cbm, vbm, is_direct = vdata.eigenvalue_band_properties
 
-cbm = vdata.eigenvalue_band_properties[1]
-vbm = vdata.eigenvalue_band_properties[2]
+spin_up = [gap[0],cbm[0],vbm[0],is_direct[0]]
+#, vbm_kpt[0], cbm_kpt[0]]
+spin_down = [gap[1],cbm[1],vbm[1],is_direct[1]]
+#, vbm_kpt[0], cbm_kpt[1]]
+fermi = vdata.calculate_efermi()
 
-vdist = vbm - vdata.calculate_efermi() # Distance between efermi and valence band max
-cdist = cbm - vdata.calculate_efermi() # Distance between efermi and conduction band min
-
-# Print band gap meta data
-print('Fermi level from vasprun = ', vdata.efermi)
-print('Calculated Fermi level = ', vdata.calculate_efermi())
-print('Run converged (ionic)?? ', vdata.converged_ionic)
-print('Run converged (electronic?? ', vdata.converged_electronic)
-print('from eigenval [gap, cbm, vbm, is_band_gap_direct] = ', data.eigenvalue_band_properties)
-print('from vasprun [gap, cbm, vbm, is_band_gap_direct] = ', vdata.eigenvalue_band_properties)
-print('Efermi from VBM (VBM - E_f) = ', vdist)
-print('Efermi from CBM (CBM - E_f) = ', cdist)
-
-# Print the location of the fermi level with respect to the band edges
-if vdist > 0:
-	print('Fermi level below VBM')
-elif vdist < 0:
-	print('Fermi level above VBM')
-
-if cdist > 0:
-	print('Fermi level below CBM')
-elif cdist < 0:
-	print('Fermi level above CBM')
+print("Spin up: gap = %s cbm = %s fermi = %s vbm = %s is_direct = %s" % (spin_up[0], spin_up[1], fermi, spin_up[2], spin_up[3]))
+print("Spin down: gap = %s cbm = %s fermi = %s vbm = %s is_direct = %s" % (spin_down[0], spin_down[1], fermi, spin_down[2], spin_down[3]))
