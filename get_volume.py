@@ -44,7 +44,24 @@ c = (data[4])
 for k in range(len(c)):
 	c[k] = float(c[k])
 
+moda = np.sqrt(a[0]**2 + a[1]**2 + a[2]**2)
+modb = np.sqrt(b[0]**2 + b[1]**2 + b[2]**2)
+modc = np.sqrt(c[0]**2 + c[1]**2 + c[2]**2)
+
+v = [moda, modb, modc]
+k = [1/moda, 1/modb, 1/modc]
+vmax = np.max(v)
+kpt = [np.rint(k[0]*vmax), np.rint(k[1]*vmax), np.rint(k[2]*vmax)]
+
 b_cross_c = np.cross(b,c)
 a_dot_b_cross_c = np.dot(a,b_cross_c)
 vol = np.absolute(a_dot_b_cross_c)
-print('System volume (A^3) = ', vol)
+print('a: ', moda)
+print('b: ', modb)
+print('c: ', modc)
+print('Kpoint mesh: ', kpt)
+num_units = int(input('Number of formula units/supercell: '))
+print('(Psuedo)cubic lattice constant', (vol/num_units)**(1/3))
+print('Volume (A^3) = ', vol)
+
+
